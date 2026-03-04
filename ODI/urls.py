@@ -24,8 +24,8 @@ urlpatterns = [
 
     #Documentation Endpoints
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
     #Endpoints
-    path('api/auth', include('auth.urls'), name = 'Authentication Endpoints')
+    path('api/auth/', include('athens.urls'), name = 'Authentication Endpoints')
 ]
