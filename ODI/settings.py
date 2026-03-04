@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'drf_spectacular'
+    'drf_spectacular', 
+    'athens'
 ]
 
 MIDDLEWARE = [
@@ -129,3 +130,5 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
     # OTHER SETTINGS
 }
+
+AUTH_USER_MODEL = 'athens.User'  
