@@ -71,3 +71,5 @@ class VerifyToken(views.APIView):
             return Response(response, status=status.HTTP_200_OK)
         except TokenError:
             return Response({'msg' : "Unauthorised"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        
