@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .serializers import UserSerializer, CustomTokenSerializer
+from .serializers import ProfileSerializer, UserSerializer, CustomTokenSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt import views
@@ -7,13 +7,13 @@ from rest_framework import generics
 from rest_framework import views
 from rest_framework_simplejwt import views as jwt_view
 from rest_framework import status 
-from .models import User
+from .models import Profile, User
 import jwt
 from django.conf import settings
 from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework_simplejwt.exceptions import TokenError
-
-
+from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 
@@ -73,3 +73,36 @@ class VerifyToken(views.APIView):
             return Response({'msg' : "Unauthorised"}, status=status.HTTP_401_UNAUTHORIZED)
         
         
+class ProfileCreateView(views.APIView):
+    """
+    POST /profiles/
+    Create a new profile. Send files as multipart/form-data.
+    """
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        serializer = ProfileSerializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class ProfileDetailView(views.APIView):
+    """
+    GET    /profiles/<id>/   — retrieve profile
+    PATCH  /profiles/<id>/   — partial update (only send fields you want to change)
+    """
+    def get_object(self, pk):
+        return get_object_or_404(Profile, pk=pk)
+
+    def get(self, request, pk):
+        profile = self.get_object(pk)
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):
+        profile = self.get_object(pk)
+        serializer = ProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
