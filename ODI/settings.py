@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import cloudinary
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,7 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'drf_spectacular', 
-    'athens'
+
+    # installed
+    'cloudinary_storage',
+    'cloudinary',
+
+    # apps
+    'athens', 
 ]
 
 MIDDLEWARE = [
@@ -121,6 +128,9 @@ STATIC_URL = 'static/'
 REST_FRAMEWORK = {
     # YOUR SETTINGS
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
 }
 
 SPECTACULAR_SETTINGS = {
@@ -132,3 +142,11 @@ SPECTACULAR_SETTINGS = {
 }
 
 AUTH_USER_MODEL = 'athens.User'  
+
+cloudinary.config(
+    cloud_name="def5zz4q1",   # e.g. "dxyz123"
+    api_key="467341326993928",         # e.g. "123456789"
+    api_secret="iRE5cCidLo4k6kPPWs_pjQWtFLc"    # e.g. "abcDEF_xyz"
+)
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
