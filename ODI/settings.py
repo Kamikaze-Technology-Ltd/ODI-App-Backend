@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-tkf(x3attouj@1+e7d-da(56a=b-gr36k=yn%!obcv&yvp_icz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['odi-app-backend.onrender.com']
+ALLOWED_HOSTS = ['odi-app-backend.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition

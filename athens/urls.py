@@ -8,7 +8,7 @@ urlpatterns = [
     
     path("create/profiles/", ProfileCreateView.as_view(), name="profile-create"),
     path("profiles/<str:pk>/", ProfileDetailView.as_view(), name="profile-detail"),
-    path('forgot-password/', ForgotPasswordView.as_view(), name='forgot-password'),
-    path('verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
-    path('reset-password/', ResetPasswordView.as_view(), name='reset-password'),
+    # path('forgot-password/', ForgotPasswordView.as_view(), name='forgot-password'),
+    # path('verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
+    # path('reset-password/', ResetPasswordView.as_view(), name='reset-password'),
 ]
