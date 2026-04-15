@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
 from rest_framework import serializers
+from .models import OTPCode
 
 from .utils import upload_image
 
@@ -12,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['phone_number', 'password', 'driver_id', 'id']
+        fields = ['phone_number', 'password', 'driver_id', 'id', 'role']
         extra_kwargs = {"password" : {"write_only" : True}}
     
     def create(self, validated_data):   
@@ -95,3 +96,52 @@ class ProfileSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         validated_data = self._handle_uploads(validated_data)
         return super().update(instance, validated_data)
+
+####
+class ForgotPasswordSerializer(serializers.Serializer):
+    phone_number = serializers.CharField()
+
+    def validate_phone_number(self, value):
+        if not User.objects.filter(phone_number=value).exists():
+            raise serializers.ValidationError("No account found with this phone number.")
+        return value
+
+
+class VerifyOTPSerializer(serializers.Serializer):
+    phone_number = serializers.CharField()
+    code = serializers.CharField(max_length=6)
+
+    def validate(self, data):
+        try:
+            user = User.objects.get(phone_number=data['phone_number'])
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid phone number.")
+
+        otp = OTPCode.objects.filter(
+            user=user,
+            code=data['code'],
+            is_used=False
+        ).last()
+
+        if not otp:
+            raise serializers.ValidationError("Invalid OTP code.")
+
+        if otp.is_expired():
+            raise serializers.ValidationError("OTP has expired. Please request a new one.")
+
+        data['otp'] = otp
+        data['user'] = user
+        return data
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    reset_token = serializers.CharField()
+    new_password = serializers.CharField(min_length=8, write_only=True)
+
+    def validate_reset_token(self, value):
+        otp = OTPCode.objects.filter(reset_token=value, is_used=False).last()
+        if not otp:
+            raise serializers.ValidationError("Invalid or already used reset token.")
+        if otp.is_expired():
+            raise serializers.ValidationError("Reset token has expired.")
+        return value

@@ -2,6 +2,9 @@ from django.db import models
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from uuid import uuid4
+from .utils import generate_otp
+from django.utils import timezone
+from datetime import timedelta
 
 # Create your models here.
 def generate_id():
@@ -28,11 +31,18 @@ class UserManager(BaseUserManager):
 
 # Create your models here.
 class User(AbstractUser):
+
+    ROLE_CHOICES = (
+            ('driver', 'driver'),
+            ('inspector', 'inspector'),
+        )
+
     USERNAME_FIELD = 'phone_number'
     username = None
     id = models.CharField(max_length=255, primary_key= True, default = generate_id, null=False)
     phone_number = models.CharField(max_length=20, unique=True, null=False)
     driver_id = models.CharField(max_length=10, unique=True, null=False)
+    role = models.CharField(max_length = 10, choices=ROLE_CHOICES, null=False)
     REQUIRED_FIELDS = []
     objects = UserManager()
     
@@ -62,3 +72,18 @@ class Profile(models.Model):
     nin_doc = models.URLField(null=True)
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+
+class OTPCode(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otp_codes')
+    code = models.CharField(max_length=6, default=generate_otp)
+    reset_token = models.CharField(max_length=255, null=True, blank=True)
+    is_used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        return timezone.now() > self.created_at + timedelta(minutes=10)
+
+    def __str__(self):
+        return f"{self.user.phone_number} - {self.code}"

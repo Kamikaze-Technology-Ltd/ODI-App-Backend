@@ -1,4 +1,6 @@
 from django.shortcuts import render
+
+from athens.utils import generate_reset_token
 from .serializers import ProfileSerializer, UserSerializer, CustomTokenSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -7,13 +9,15 @@ from rest_framework import generics
 from rest_framework import views
 from rest_framework_simplejwt import views as jwt_view
 from rest_framework import status 
-from .models import Profile, User
+from .models import OTPCode, Profile, User
 import jwt
 from django.conf import settings
 from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework_simplejwt.exceptions import TokenError
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from .serializers import ResetPasswordSerializer, VerifyOTPSerializer, ForgotPasswordSerializer
+from django.core.mail import send_mail
 
 # Create your views here.
 
@@ -39,7 +43,8 @@ class CustomTokenObtainView(jwt_view.TokenObtainPairView):
             'access' : data['access'], 
             'user_id' : user.id, 
             'phone_number' : user.phone_number, 
-            'driver_id' : user.driver_id
+            'driver_id' : user.driver_id, 
+            'role' : user.role
         })
 
         response.set_cookie('access', data['access'], samesite='None', secure=True, httponly=True)
@@ -106,3 +111,102 @@ class ProfileDetailView(views.APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+####
+
+class ForgotPasswordView(views.APIView):
+    """
+    POST /auth/forgot-password/
+    Accepts phone number, looks up profile email, sends OTP
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        phone_number = serializer.validated_data['phone_number']
+        user = User.objects.get(phone_number=phone_number)
+
+        # Get email from profile
+        profile = Profile.objects.filter(user=user).first()
+        if not profile or not profile.emails:
+            return Response(
+                {'msg': 'No email address associated with this account.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Invalidate old unused OTPs for this user
+        OTPCode.objects.filter(user=user, is_used=False).update(is_used=True)
+
+        # Create new OTP
+        otp = OTPCode.objects.create(user=user)
+
+        # Send email
+        send_mail(
+            subject='Password Reset OTP',
+            message=f'Your OTP code is: {otp.code}\n\nThis code expires in 10 minutes. Do not share it with anyone.',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[profile.emails],
+            fail_silently=False,
+        )
+
+        return Response(
+            {'msg': 'OTP sent to your registered email address.'},
+            status=status.HTTP_200_OK
+        )
+
+
+class VerifyOTPView(views.APIView):
+    """
+    POST /auth/verify-otp/
+    Accepts phone number + OTP, returns a reset token
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = VerifyOTPSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        otp = serializer.validated_data['otp']
+
+        # Generate and attach reset token
+        otp.reset_token = generate_reset_token()
+        otp.save()
+
+        return Response(
+            {'reset_token': otp.reset_token},
+            status=status.HTTP_200_OK
+        )
+
+
+class ResetPasswordView(views.APIView):
+    """
+    POST /auth/reset-password/
+    Accepts reset token + new password, updates password
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        reset_token = serializer.validated_data['reset_token']
+        new_password = serializer.validated_data['new_password']
+
+        otp = OTPCode.objects.filter(reset_token=reset_token, is_used=False).last()
+        user = otp.user
+        user.set_password(new_password)
+        user.save()
+
+        # Mark OTP as used so token can't be reused
+        otp.is_used = True
+        otp.save()
+
+        return Response(
+            {'msg': 'Password reset successful.'},
+            status=status.HTTP_200_OK
+        )
