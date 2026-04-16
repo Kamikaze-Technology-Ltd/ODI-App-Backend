@@ -58,7 +58,7 @@ class Profile(models.Model):
     full_name = models.CharField(max_length=255, null=False)
     gender = models.CharField(max_length=10, choices=CURRENCY_CHOICES, null=False)
     date_of_birth = models.DateField(null=False)
-    emails = models.EmailField(null=False)
+    email = models.EmailField(null=False)
     medical_history = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=13, null=False)
     depot_zone = models.CharField(max_length=255)
@@ -71,7 +71,7 @@ class Profile(models.Model):
     drivers_license_doc = models.URLField(null=True)
     nin_doc = models.URLField(null=True)
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
 
 

@@ -18,6 +18,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from .serializers import ResetPasswordSerializer, VerifyOTPSerializer, ForgotPasswordSerializer
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
 
 # Create your views here.
 
@@ -131,7 +132,7 @@ class ForgotPasswordView(views.APIView):
 
         # Get email from profile
         profile = Profile.objects.filter(user=user).first()
-        if not profile or not profile.emails:
+        if not profile or not profile.email:
             return Response(
                 {'msg': 'No email address associated with this account.'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -142,13 +143,19 @@ class ForgotPasswordView(views.APIView):
 
         # Create new OTP
         otp = OTPCode.objects.create(user=user)
-
+        
         # Send email
+        html_message = render_to_string('otp_email.html', {
+            'user_name': user.first_name,
+            'otp_code': otp.code,
+        })
+
         send_mail(
-            subject='Password Reset OTP',
-            message=f'Your OTP code is: {otp.code}\n\nThis code expires in 10 minutes. Do not share it with anyone.',
+            subject='Account Verification',
+            message=f'Your OTP code is {otp}',  # plain text fallback
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[profile.emails],
+            recipient_list=[user.profile.email],
+            html_message=html_message,
             fail_silently=False,
         )
 

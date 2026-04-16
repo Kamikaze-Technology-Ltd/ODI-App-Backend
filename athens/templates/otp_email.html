@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ODI Logistics – OTP Verification</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #0d1f1a;
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "SF Pro Display",
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+        padding: 40px 16px;
+      }
+
+      .wrapper {
+        max-width: 560px;
+        margin: 0 auto;
+        border-radius: 16px;
+        overflow: hidden;
+      }
+
+      /* ── Header ── */
+      .header {
+        background-color: #d9f5c5;
+        padding: 36px 40px;
+        text-align: center;
+      }
+
+      .logo-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .logo-mark {
+        width: 56px;
+        height: 56px;
+      }
+
+      .logo-text {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0d3d2a;
+        line-height: 1;
+        text-align: left;
+        letter-spacing: 0.01em;
+      }
+
+      .logo-text .sub {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        color: #0d3d2a;
+        text-transform: uppercase;
+        margin-top: 2px;
+      }
+
+      /* ── Body ── */
+      .body {
+        background-color: #f4f6f3;
+        padding: 40px 48px 40px;
+      }
+
+      .greeting {
+        font-size: 17px;
+        font-weight: 600;
+        color: #0d1f1a;
+        margin-bottom: 12px;
+      }
+
+      .message {
+        font-size: 15px;
+        font-weight: 400;
+        color: #3a4a42;
+        line-height: 1.65;
+        margin-bottom: 32px;
+      }
+
+      .otp-code {
+        font-size: 44px;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        color: #0d1f1a;
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .disclaimer {
+        font-size: 14px;
+        font-weight: 400;
+        color: #3a4a42;
+        line-height: 1.65;
+      }
+
+      /* ── Footer ── */
+      .footer {
+        background-color: #e6f2e0;
+        padding: 28px 40px 32px;
+        text-align: center;
+      }
+
+      .footer-tagline {
+        font-size: 13px;
+        color: #3a5a46;
+        margin-bottom: 4px;
+      }
+
+      .footer-contact {
+        font-size: 13px;
+        color: #3a5a46;
+        margin-bottom: 4px;
+      }
+
+      .footer-email {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1a6640;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 20px;
+      }
+
+      .socials {
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        margin-bottom: 24px;
+      }
+
+      .social-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+      }
+
+      .social-btn svg {
+        width: 16px;
+        height: 16px;
+        fill: #0d3d2a;
+      }
+
+      .app-section {
+        border-top: 1px solid #cce0d4;
+        padding-top: 20px;
+      }
+
+      .app-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0d3d2a;
+        margin-bottom: 3px;
+      }
+
+      .app-sub {
+        font-size: 12px;
+        color: #6a9478;
+        margin-bottom: 16px;
+      }
+
+      .store-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .store-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #0d1f1a;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 8px;
+        padding: 10px 18px;
+      }
+
+      .store-btn svg {
+        width: 18px;
+        height: 18px;
+        fill: #fff;
+        flex-shrink: 0;
+      }
+
+      .store-btn-text {
+        text-align: left;
+      }
+
+      .store-btn-sub {
+        display: block;
+        font-size: 9px;
+        color: #8ab89a;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .store-btn-name {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Header -->
+      <div class="header">
+        <div class="logo-row">
+          <svg
+            class="logo-mark"
+            viewBox="0 0 56 56"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="28" cy="24" r="14" fill="#0d3d2a" />
+            <circle cx="28" cy="24" r="7" fill="#d9f5c5" />
+            <circle cx="28" cy="24" r="3.5" fill="#0d3d2a" />
+            <path
+              d="M16 40 Q22 32 28 36"
+              stroke="#2e7d52"
+              stroke-width="3"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M28 36 Q34 40 40 34"
+              stroke="#2e7d52"
+              stroke-width="3"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <line
+              x1="28"
+              y1="38"
+              x2="28"
+              y2="50"
+              stroke="#0d3d2a"
+              stroke-width="3.5"
+              stroke-linecap="round"
+            />
+          </svg>
+          <div class="logo-text">
+            ODI
+            <span class="sub">Logistics</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="body">
+        <p class="greeting">Hi {{ user_name }} 👋,</p>
+        <p class="message">
+          To ensure the security of your account, please verify your account by
+          entering the code below in the app
+        </p>
+
+        <p class="otp-code">{{ otp_code }}</p>
+
+        <p class="disclaimer">
+          If you haven't signed up for ODI or didn't request this verification,
+          please ignore this email.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p class="footer-tagline">With love 💜 from ODI logistics</p>
+        <p class="footer-contact">
+          If you have any questions, please contact us at
+        </p>
+        <a href="mailto:support@odilogistics.com" class="footer-email"
+          >support@odilogistics.com</a
+        >
+
+        <div class="socials">
+          <a href="#" class="social-btn">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"
+              />
+            </svg>
+          </a>
+          <a href="#" class="social-btn">
+            <svg viewBox="0 0 24 24">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+              <path
+                d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"
+                fill="#e6f2e0"
+              />
+              <line
+                x1="17.5"
+                y1="6.5"
+                x2="17.51"
+                y2="6.5"
+                stroke="#e6f2e0"
+                stroke-width="2"
+              />
+            </svg>
+          </a>
+          <a href="#" class="social-btn">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"
+              />
+            </svg>
+          </a>
+          <a href="#" class="social-btn">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"
+              />
+              <polygon
+                points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"
+                fill="#e6f2e0"
+              />
+            </svg>
+          </a>
+        </div>
+
+        <div class="app-section">
+          <p class="app-title">Download our Mobile App</p>
+          <p class="app-sub">Unlocking the Power of Digital Wealth</p>
+          <div class="store-buttons">
+            <a href="#" class="store-btn">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+                />
+              </svg>
+              <div class="store-btn-text">
+                <span class="store-btn-sub">Download on the</span>
+                <span class="store-btn-name">App Store</span>
+              </div>
+            </a>
+            <a href="#" class="store-btn">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M3.18 23.76c.3.17.64.24.99.2l12.45-12.4L13 8l-9.82 15.76zM20.7 10.37l-2.86-1.62-3.47 3.47 3.46 3.46 2.89-1.64c.82-.46.82-1.21-.02-1.67zM2.1.44C1.8.64 1.6 1.01 1.6 1.5v21l12.1-12.1L2.1.44zm14.17 8.03L4.09.29l9.28 9.28 2.9-1.1z"
+                />
+              </svg>
+              <div class="store-btn-text">
+                <span class="store-btn-sub">Get it on</span>
+                <span class="store-btn-name">Google Play</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
