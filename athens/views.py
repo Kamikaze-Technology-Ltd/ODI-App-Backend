@@ -85,6 +85,7 @@ class ProfileCreateView(views.APIView):
     Create a new profile. Send files as multipart/form-data.
     """
     permission_classes = [IsAuthenticated]
+    serializer_class = ProfileSerializer
     def post(self, request):
         serializer = ProfileSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():

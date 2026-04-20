@@ -66,7 +66,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = [
-            "id", "full_name", "gender", "date_of_birth", "emails",
+            "id", "full_name", "gender", "date_of_birth", "email",
             "medical_history", "phone_number", "depot_zone",
             "drivers_license", "license_expiry", "emergency_contact_phone_no",
             "profile_picture", "profile_picture_file",
