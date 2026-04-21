@@ -9,15 +9,85 @@ from .models import OTPCode
 from .utils import upload_image
 
 
+class ProfileSerializer(serializers.ModelSerializer):
+    profile_picture_file = serializers.ImageField(write_only=True, required=False)
+    drivers_license_doc_file = serializers.FileField(write_only=True, required=False)
+    nin_doc_file = serializers.FileField(write_only=True, required=False)
+
+    profile_picture = serializers.URLField(read_only=True)
+    drivers_license_doc = serializers.URLField(read_only=True)
+    nin_doc = serializers.URLField(read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = [
+            "id", "full_name", "gender", "date_of_birth", "email",
+            "medical_history", "phone_number", "depot_zone",
+            "drivers_license", "license_expiry", "emergency_contact_phone_no",
+            "profile_picture", "profile_picture_file",
+            "drivers_license_doc", "drivers_license_doc_file",
+            "nin_doc", "nin_doc_file",
+        ]
+        read_only_fields = ["id"]
+
+    def _handle_uploads(self, validated_data):
+        profile_picture_file = validated_data.pop("profile_picture_file", None)
+        drivers_license_file = validated_data.pop("drivers_license_doc_file", None)
+        nin_file = validated_data.pop("nin_doc_file", None)
+
+        if profile_picture_file:
+            validated_data["profile_picture"] = upload_image(profile_picture_file, folder="profile_pictures")
+        if drivers_license_file:
+            validated_data["drivers_license_doc"] = upload_image(drivers_license_file, folder="licenses")
+        if nin_file:
+            validated_data["nin_doc"] = upload_image(nin_file, folder="nin_docs")
+
+        return validated_data
+
+    def create(self, validated_data):
+        validated_data = self._handle_uploads(validated_data)
+        user = self.context["request"].user
+        return Profile.objects.create(user=user, **validated_data)
+
+    def update(self, instance, validated_data):
+        validated_data = self._handle_uploads(validated_data)
+        return super().update(instance, validated_data)
+
+
+_PROFILE_FIELDS = [
+    'full_name', 'gender', 'date_of_birth', 'email', 'medical_history',
+    'depot_zone', 'drivers_license', 'license_expiry', 'emergency_contact_phone_no',
+    'profile_picture_file', 'drivers_license_doc_file', 'nin_doc_file',
+]
+
 class UserSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(write_only=True)
+    gender = serializers.ChoiceField(choices=["male", "female"], write_only=True)
+    date_of_birth = serializers.DateField(write_only=True)
+    email = serializers.EmailField(write_only=True)
+    medical_history = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    depot_zone = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    drivers_license = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    license_expiry = serializers.DateField(write_only=True, required=False, allow_null=True)
+    emergency_contact_phone_no = serializers.CharField(write_only=True)
+    profile_picture_file = serializers.ImageField(write_only=True, required=False)
+    drivers_license_doc_file = serializers.FileField(write_only=True, required=False)
+    nin_doc_file = serializers.FileField(write_only=True, required=False)
 
     class Meta:
         model = User
-        fields = ['phone_number', 'password', 'driver_id', 'id', 'role']
-        extra_kwargs = {"password" : {"write_only" : True}}
-    
-    def create(self, validated_data):   
+        fields = [
+            'id', 'phone_number', 'password', 'driver_id', 'role',
+            *_PROFILE_FIELDS,
+        ]
+        extra_kwargs = {"password": {"write_only": True}}
+        read_only_fields = ["id"]
+
+    def create(self, validated_data):
+        profile_data = {f: validated_data.pop(f) for f in _PROFILE_FIELDS if f in validated_data}
         user = User.objects.create_user(**validated_data)
+        profile_data = ProfileSerializer()._handle_uploads(profile_data)
+        Profile.objects.create(user=user, phone_number=user.phone_number, **profile_data)
         return user
 
 class CustomTokenSerializer(TokenObtainPairSerializer):
@@ -53,49 +123,6 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
             'is_staff': user.is_staff,
         }
         
-
-class ProfileSerializer(serializers.ModelSerializer):
-    profile_picture_file = serializers.ImageField(write_only=True, required=False)
-    drivers_license_doc_file = serializers.ImageField(write_only=True, required=False)
-    nin_doc_file = serializers.ImageField(write_only=True, required=False)
-    
-    profile_picture = serializers.URLField(read_only=True)
-    drivers_license_doc_file = serializers.FileField(write_only=True, required=False)   # change to FileField
-    nin_doc_file = serializers.FileField(write_only=True, required=False) 
-    
-    class Meta:
-        model = Profile
-        fields = [
-            "id", "full_name", "gender", "date_of_birth", "email",
-            "medical_history", "phone_number", "depot_zone",
-            "drivers_license", "license_expiry", "emergency_contact_phone_no",
-            "profile_picture", "profile_picture_file",
-            "drivers_license_doc", "drivers_license_doc_file",
-            "nin_doc", "nin_doc_file",
-        ]
-
-    def _handle_uploads(self, validated_data):
-        profile_picture_file = validated_data.pop("profile_picture_file", None)
-        drivers_license_file = validated_data.pop("drivers_license_doc_file", None)
-        nin_file = validated_data.pop("nin_doc_file", None)
-
-        if profile_picture_file:
-            validated_data["profile_picture"] = upload_image(profile_picture_file, folder="profile_pictures")
-        if drivers_license_file:
-            validated_data["drivers_license_doc"] = upload_image(drivers_license_file, folder="licenses")
-        if nin_file:
-            validated_data["nin_doc"] = upload_image(nin_file, folder="nin_docs")
-
-        return validated_data
-
-    def create(self, validated_data):
-        validated_data = self._handle_uploads(validated_data)
-        user = self.context["request"].user
-        return Profile.objects.create(user=user, **validated_data)
-
-    def update(self, instance, validated_data):
-        validated_data = self._handle_uploads(validated_data)
-        return super().update(instance, validated_data)
 
 ####
 class ForgotPasswordSerializer(serializers.Serializer):

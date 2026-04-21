@@ -45,7 +45,8 @@ class CustomTokenObtainView(jwt_view.TokenObtainPairView):
             'user_id' : user.id, 
             'phone_number' : user.phone_number, 
             'driver_id' : user.driver_id, 
-            'role' : user.role
+            'role' : user.role, 
+            'profile_id' : user.profile.id
         })
 
         response.set_cookie('access', data['access'], samesite='None', secure=True, httponly=True)
@@ -79,20 +80,6 @@ class VerifyToken(views.APIView):
             return Response({'msg' : "Unauthorised"}, status=status.HTTP_401_UNAUTHORIZED)
         
         
-class ProfileCreateView(views.APIView):
-    """
-    POST /profiles/
-    Create a new profile. Send files as multipart/form-data.
-    """
-    permission_classes = [IsAuthenticated]
-    serializer_class = ProfileSerializer
-    def post(self, request):
-        serializer = ProfileSerializer(data=request.data, context={"request": request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 class ProfileDetailView(views.APIView):
     """
     GET    /profiles/<id>/   — retrieve profile
