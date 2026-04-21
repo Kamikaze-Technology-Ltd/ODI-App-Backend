@@ -144,9 +144,9 @@ SPECTACULAR_SETTINGS = {
 AUTH_USER_MODEL = 'athens.User'  
 
 cloudinary.config(
-    cloud_name="def5zz4q1",   # e.g. "dxyz123"
-    api_key="467341326993928",         # e.g. "123456789"
-    api_secret="iRE5cCidLo4k6kPPWs_pjQWtFLc"    # e.g. "abcDEF_xyz"
+    cloud_name="dgbth0aq",   # e.g. "dxyz123"
+    api_key="271394464972463",         # e.g. "123456789"
+    api_secret="NdaMcd5klV9MpxLzlqUtBLw0QQc"    # e.g. "abcDEF_xyz"
 )
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
