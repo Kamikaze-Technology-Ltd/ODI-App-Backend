@@ -109,6 +109,7 @@ class ForgotPasswordView(views.APIView):
     Accepts phone number, looks up profile email, sends OTP
     """
     permission_classes = [AllowAny]
+    serializer_class = ForgotPasswordSerializer
 
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
@@ -159,6 +160,7 @@ class VerifyOTPView(views.APIView):
     Accepts phone number + OTP, returns a reset token
     """
     permission_classes = [AllowAny]
+    serializer_class = VerifyOTPSerializer
 
     def post(self, request):
         serializer = VerifyOTPSerializer(data=request.data)
@@ -183,6 +185,7 @@ class ResetPasswordView(views.APIView):
     Accepts reset token + new password, updates password
     """
     permission_classes = [AllowAny]
+    serializer_class = ResetPasswordSerializer
 
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
