@@ -10,18 +10,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 import cloudinary
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-tkf(x3attouj@1+e7d-da(56a=b-gr36k=yn%!obcv&yvp_icz'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -32,6 +36,7 @@ ALLOWED_HOSTS = ['odi-app-backend.onrender.com', 'localhost', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,9 +49,30 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     'cloudinary',
 
+    # third-party
+    'channels',
+
     # apps
-    'athens', 
+    'athens',
+    'chat',
+    "corsheaders",
 ]
+
+ASGI_APPLICATION = 'ODI.asgi.application'
+
+# Use InMemoryChannelLayer for development.
+# For production, replace with Redis: pip install channels_redis
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {'hosts': [('127.0.0.1', 6379)]},
+#     }
+# }
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -56,6 +82,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'ODI.urls'
@@ -144,9 +171,9 @@ SPECTACULAR_SETTINGS = {
 AUTH_USER_MODEL = 'athens.User'  
 
 cloudinary.config(
-    cloud_name="dgbth0aq",   # e.g. "dxyz123"
-    api_key="271394464972463",         # e.g. "123456789"
-    api_secret="NdaMcd5klV9MpxLzlqUtBLw0QQc"    # e.g. "abcDEF_xyz"
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET'),
 )
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
@@ -156,6 +183,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'kamikazetechnology8@gmail.com'
-EMAIL_HOST_PASSWORD = 'zksgufaehsptvnoh'  # Use an App Password, not your real password
-DEFAULT_FROM_EMAIL = 'kamikazetechnology8@gmail.com'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]

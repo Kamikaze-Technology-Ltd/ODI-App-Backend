@@ -27,5 +27,6 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
     #Endpoints
-    path('api/auth/', include('athens.urls'), name = 'Authentication Endpoints')
+    path('api/auth/', include('athens.urls'), name='Authentication Endpoints'),
+    path('api/chat/', include('chat.urls'), name='Chat Endpoints'),
 ]
