@@ -1,21 +1,16 @@
-from django.shortcuts import render
-
 from athens.utils import generate_reset_token
 from .serializers import ProfileSerializer, UserSerializer, CustomTokenSerializer
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt import views
-from rest_framework import generics
-from rest_framework import views
 from rest_framework_simplejwt import views as jwt_view
-from rest_framework import status 
+from rest_framework import generics, views, status
+from rest_framework.parsers import MultiPartParser, FormParser
 from .models import OTPCode, Profile, User
 import jwt
 from django.conf import settings
 from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework_simplejwt.exceptions import TokenError
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
 from .serializers import ResetPasswordSerializer, VerifyOTPSerializer, ForgotPasswordSerializer
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -25,6 +20,7 @@ from django.template.loader import render_to_string
 class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
+    parser_classes = [MultiPartParser, FormParser]
 
 class CustomTokenObtainView(jwt_view.TokenObtainPairView):
     serializer_class = CustomTokenSerializer
@@ -85,6 +81,10 @@ class ProfileDetailView(views.APIView):
     GET    /profiles/<id>/   — retrieve profile
     PATCH  /profiles/<id>/   — partial update (only send fields you want to change)
     """
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProfileSerializer
+
     def get_object(self, pk):
         return get_object_or_404(Profile, pk=pk)
 

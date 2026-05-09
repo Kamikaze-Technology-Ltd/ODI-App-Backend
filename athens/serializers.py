@@ -1,22 +1,41 @@
+import logging
 from athens.models import Profile, User
-from rest_framework_simplejwt import serializers as jwt_seriaizer
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
-from rest_framework import serializers
+from django.core.files.uploadedfile import UploadedFile
 from .models import OTPCode
-
 from .utils import upload_image
+
+logger = logging.getLogger(__name__)
+
+
+def validate_is_file(value):
+    if not isinstance(value, UploadedFile):
+        raise serializers.ValidationError("A valid file must be uploaded. Plain text is not accepted.")
+    return value
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    profile_picture_file = serializers.ImageField(write_only=True, required=False)
-    drivers_license_doc_file = serializers.FileField(write_only=True, required=False)
-    nin_doc_file = serializers.FileField(write_only=True, required=False)
+    profile_picture_file = serializers.ImageField(
+        write_only=True, required=False,
+        validators=[validate_is_file],
+        help_text="Upload profile picture (jpg/png)"
+    )
+    drivers_license_doc_file = serializers.FileField(
+        write_only=True, required=False,
+        validators=[validate_is_file],
+        help_text="Upload driver's license document (pdf/jpg/png)"
+    )
+    nin_doc_file = serializers.FileField(
+        write_only=True, required=False,
+        validators=[validate_is_file],
+        help_text="Upload NIN document (pdf/jpg/png)"
+    )
 
-    profile_picture = serializers.URLField(read_only=True)
-    drivers_license_doc = serializers.URLField(read_only=True)
-    nin_doc = serializers.URLField(read_only=True)
+    profile_picture = serializers.URLField(read_only=True, required=False)
+    drivers_license_doc = serializers.URLField(read_only=True, required=False)
+    nin_doc = serializers.URLField(read_only=True, required=False)
 
     class Meta:
         model = Profile
@@ -35,12 +54,33 @@ class ProfileSerializer(serializers.ModelSerializer):
         drivers_license_file = validated_data.pop("drivers_license_doc_file", None)
         nin_file = validated_data.pop("nin_doc_file", None)
 
-        if profile_picture_file:
-            validated_data["profile_picture"] = upload_image(profile_picture_file, folder="profile_pictures")
-        if drivers_license_file:
-            validated_data["drivers_license_doc"] = upload_image(drivers_license_file, folder="licenses")
-        if nin_file:
-            validated_data["nin_doc"] = upload_image(nin_file, folder="nin_docs")
+        logger.info(f"[_handle_uploads] profile_picture_file={profile_picture_file} | "
+                    f"drivers_license_file={drivers_license_file} | nin_file={nin_file}")
+
+        try:
+            if profile_picture_file:
+                url = upload_image(profile_picture_file, folder="profile_pictures")
+                if not url:
+                    raise serializers.ValidationError({"profile_picture_file": "Upload failed. Check Cloudinary credentials."})
+                validated_data["profile_picture"] = url
+
+            if drivers_license_file:
+                url = upload_image(drivers_license_file, folder="licenses")
+                if not url:
+                    raise serializers.ValidationError({"drivers_license_doc_file": "Upload failed. Check Cloudinary credentials."})
+                validated_data["drivers_license_doc"] = url
+
+            if nin_file:
+                url = upload_image(nin_file, folder="nin_docs")
+                if not url:
+                    raise serializers.ValidationError({"nin_doc_file": "Upload failed. Check Cloudinary credentials."})
+                validated_data["nin_doc"] = url
+
+        except serializers.ValidationError:
+            raise
+        except Exception as e:
+            logger.error(f"[_handle_uploads] Unexpected error: {str(e)}")
+            raise serializers.ValidationError({"upload_error": f"File upload failed: {str(e)}"})
 
         return validated_data
 
@@ -51,6 +91,11 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         validated_data = self._handle_uploads(validated_data)
+        # Manually set URL fields since they are read_only and excluded from super().update()
+        for field in ("profile_picture", "drivers_license_doc", "nin_doc"):
+            if field in validated_data:
+                setattr(instance, field, validated_data.pop(field))
+        instance.save()
         return super().update(instance, validated_data)
 
 
@@ -70,9 +115,21 @@ class UserSerializer(serializers.ModelSerializer):
     drivers_license = serializers.CharField(write_only=True, required=False, allow_blank=True)
     license_expiry = serializers.DateField(write_only=True, required=False, allow_null=True)
     emergency_contact_phone_no = serializers.CharField(write_only=True)
-    profile_picture_file = serializers.ImageField(write_only=True, required=False)
-    drivers_license_doc_file = serializers.FileField(write_only=True, required=False)
-    nin_doc_file = serializers.FileField(write_only=True, required=False)
+    profile_picture_file = serializers.ImageField(
+        write_only=True, required=False,
+        validators=[validate_is_file],
+        help_text="Upload profile picture (jpg/png)"
+    )
+    drivers_license_doc_file = serializers.FileField(
+        write_only=True, required=False,
+        validators=[validate_is_file],
+        help_text="Upload driver's license document (pdf/jpg/png)"
+    )
+    nin_doc_file = serializers.FileField(
+        write_only=True, required=False,
+        validators=[validate_is_file],
+        help_text="Upload NIN document (pdf/jpg/png)"
+    )
 
     class Meta:
         model = User
