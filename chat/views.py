@@ -44,7 +44,10 @@ class MessageListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         room_id = self.request.data.get('room')
         room = get_object_or_404(ChatRoom, id=room_id, participants=self.request.user)
-        serializer.save(sender=self.request.user, room=room)
+        message = serializer.save(sender=self.request.user, room=room)
+
+        from notifications.services import notify_chat_participants
+        notify_chat_participants(room, self.request.user, message.content)
 
 
 class MarkMessagesReadView(views.APIView):

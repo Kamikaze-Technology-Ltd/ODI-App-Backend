@@ -29,4 +29,5 @@ urlpatterns = [
     #Endpoints
     path('api/auth/', include('athens.urls'), name='Authentication Endpoints'),
     path('api/chat/', include('chat.urls'), name='Chat Endpoints'),
+    path('api/notifications/', include('notifications.urls'), name='Notification Endpoints'),
 ]

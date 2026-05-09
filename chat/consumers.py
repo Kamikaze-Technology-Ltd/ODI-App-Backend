@@ -47,6 +47,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         message = await self._save_message(self.user, self.room_id, content)
 
+        from notifications.services import notify_chat_participants_async
+        await notify_chat_participants_async(self.room_id, self.user.id, content)
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {
