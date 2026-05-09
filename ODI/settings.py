@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+from datetime import timedelta
 import os
 from pathlib import Path
 import cloudinary
@@ -55,6 +56,7 @@ INSTALLED_APPS = [
     # apps
     'athens',
     'chat',
+    'notifications',
     "corsheaders",
 ]
 
@@ -184,6 +186,11 @@ SPECTACULAR_SETTINGS = {
 
 AUTH_USER_MODEL = 'athens.User'  
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
+
 cloudinary.config(
     cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
     api_key=os.getenv('CLOUDINARY_API_KEY'),
@@ -204,3 +211,5 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
