@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     # apps
     'athens',
     'chat',
-    'notifications',
+    # 'notifications',
     "corsheaders",
 ]
 
