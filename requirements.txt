@@ -49,6 +49,7 @@ Markdown==3.10.2
 msgpack==1.1.2
 oauthlib==3.3.1
 packaging==26.1
+pillow==12.2.0
 proto-plus==1.28.0
 protobuf==6.33.6
 py-ubjson==0.16.1
