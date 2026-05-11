@@ -33,6 +33,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['odi-app-backend.onrender.com', 'localhost', '127.0.0.1']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://odi-app-backend.onrender.com',
+]
+
 
 # Application definition
 
@@ -169,6 +173,7 @@ LOGGING = {
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 REST_FRAMEWORK = {
     # YOUR SETTINGS
