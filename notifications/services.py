@@ -1,57 +1,27 @@
+import logging
 import os
-import firebase_admin
-from firebase_admin import credentials, messaging
 from exponent_server_sdk import PushClient, PushMessage
 from channels.db import database_sync_to_async
 
-
-def _init_firebase():
-    if not firebase_admin._apps:
-        cred = credentials.Certificate({
-            "type": "service_account",
-            "project_id": os.getenv("FIREBASE_PROJECT_ID"),
-            "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
-            "private_key": os.getenv("FIREBASE_PRIVATE_KEY", "").replace("\\n", "\n"),
-            "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
-            "client_id": os.getenv("FIREBASE_CLIENT_ID"),
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-            "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL"),
-        })
-        firebase_admin.initialize_app(cred)
+logger = logging.getLogger(__name__)
 
 
 def _send_expo(token, title, body, data):
     try:
-        PushClient().publish(
+        access_token = os.getenv("EXPO_ACCESS_TOKEN")
+        headers = {"Authorization": f"Bearer {access_token}"} if access_token else None
+        ticket = PushClient(session=None, headers=headers).publish(
             PushMessage(to=token, title=title, body=body, data=data, sound="default")
         )
-    except Exception:
-        pass
-
-
-def _send_fcm(token, title, body, data):
-    try:
-        _init_firebase()
-        message = messaging.Message(
-            notification=messaging.Notification(title=title, body=body),
-            data={k: str(v) for k, v in data.items()},
-            token=token,
-        )
-        messaging.send(message)
-    except Exception:
-        pass
+        logger.info(f"[PUSH SENT] to={token[:30]}... title={title!r} body={body!r} ticket={ticket}")
+    except Exception as e:
+        logger.exception(f"[PUSH FAILED] to={token[:30]}... error={e}")
 
 
 def send_push_notification(token, title, body, data=None):
     if not token:
         return
-    payload = data or {}
-    if token.startswith("ExponentPushToken"):
-        _send_expo(token, title, body, payload)
-    else:
-        _send_fcm(token, title, body, payload)
+    _send_expo(token, title, body, data or {})
 
 
 def notify_chat_participants(room, sender, content):
