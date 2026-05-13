@@ -42,8 +42,9 @@ class CustomTokenObtainView(jwt_view.TokenObtainPairView):
             'phone_number' : user.phone_number, 
             'driver_id' : user.driver_id, 
             'role' : user.role, 
-            'profile_id' : user.profile.id
-        })
+            'profile_id' : user.profile.id, 
+            'username' : user.profile.full_name.split(' ')[0]
+         })
 
         response.set_cookie('access', data['access'], samesite='None', secure=True, httponly=True)
 
