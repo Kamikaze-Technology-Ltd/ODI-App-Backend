@@ -62,6 +62,9 @@ INSTALLED_APPS = [
     'chat',
     'notifications',
     "corsheaders",
+    "dispatch",
+    "queries",
+    "report",
 ]
 
 ASGI_APPLICATION = 'ODI.asgi.application'

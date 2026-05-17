@@ -30,4 +30,7 @@ urlpatterns = [
     path('api/auth/', include('athens.urls'), name='Authentication Endpoints'),
     path('api/chat/', include('chat.urls'), name='Chat Endpoints'),
     path('api/notifications/', include('notifications.urls'), name='Notification Endpoints'),
+    path('api/dispatch/', include('dispatch.urls'), name='Dispatch Endpoints'),
+    path('api/queries/', include('queries.urls'), name='Queries Endpoints'),
+    path('api/reports/', include('report.urls'), name='Reports Endpoints'),
 ]
