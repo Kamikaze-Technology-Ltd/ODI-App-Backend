@@ -2,11 +2,12 @@ from django.urls import path
 from .views import (
     TripListView, TripCreateView, TripRetrieveView,
     TripUpdateView, TripDeleteView,
-    TripsByStatusView, TripStatusView,
+    TripsByStatusView, TripStatusView, InspectorListView,
 )
 
 
 urlpatterns = [
+    path('inspector-list/', InspectorListView.as_view(), name='inspector-list'),
     path('trips/', TripListView.as_view(), name='trip-list'),
     path('trips/create/', TripCreateView.as_view(), name='trip-create'),
     path('trips/update/<str:pk>/', TripUpdateView.as_view(), name='trip-update'),

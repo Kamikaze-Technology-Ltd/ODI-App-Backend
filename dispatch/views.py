@@ -4,8 +4,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
+from athens.models import Profile
 from .models import Trip, TripStatus
-from .serializers import TripSerializer, TripStatusSerializer
+from .serializers import TripSerializer, TripStatusSerializer, InspectorSerializer
 
 
 class TripListView(generics.ListAPIView):
@@ -44,6 +45,22 @@ class TripDeleteView(generics.DestroyAPIView):
     queryset = Trip.objects.all()
     serializer_class = TripSerializer
     permission_classes = [IsAuthenticated]
+
+
+class InspectorListView(generics.ListAPIView):
+    """
+    GET /inspector-list/?full_name=<query>   — list inspectors whose full_name matches the query
+    Returns: full_name, profile_picture, user_id
+    """
+    serializer_class = InspectorSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        full_name = self.request.query_params.get('full_name', '')
+        return Profile.objects.filter(
+            user__role='inspector',
+            full_name__icontains=full_name,
+        )
 
 
 class TripsByStatusView(generics.ListAPIView):
