@@ -36,18 +36,19 @@ class ProfileSerializer(serializers.ModelSerializer):
     profile_picture = serializers.URLField(read_only=True, required=False)
     drivers_license_doc = serializers.URLField(read_only=True, required=False)
     nin_doc = serializers.URLField(read_only=True, required=False)
+    user_id = serializers.CharField(source='user.id', read_only=True)
 
     class Meta:
         model = Profile
         fields = [
-            "id", "full_name", "gender", "date_of_birth", "email",
+            "id", "user_id", "full_name", "gender", "date_of_birth", "email",
             "medical_history", "phone_number", "depot_zone",
             "drivers_license", "license_expiry", "emergency_contact_phone_no",
             "profile_picture", "profile_picture_file",
             "drivers_license_doc", "drivers_license_doc_file",
             "nin_doc", "nin_doc_file",
         ]
-        read_only_fields = ["id"]
+        read_only_fields = ["id", "user_id"]
 
     def _handle_uploads(self, validated_data):
         profile_picture_file = validated_data.pop("profile_picture_file", None)

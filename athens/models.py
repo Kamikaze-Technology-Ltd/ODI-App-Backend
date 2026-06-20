@@ -61,11 +61,20 @@ class Profile(models.Model):
     email = models.EmailField(null=False)
     medical_history = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=13, null=False)
-    depot_zone = models.CharField(max_length=255)
     drivers_license = models.CharField(max_length=255)
     license_expiry = models.DateField()
     emergency_contact_phone_no = models.CharField(max_length=13, null=False)
     profile_picture = models.URLField(null=True)
+
+    #Work Details
+    start_date = models.DateField(auto_now=True)
+    depot_zone = models.CharField(max_length=255)
+    medical_history = models.CharField(max_length=255)
+    supervisor = models.OneToOneField(User, on_delete=models.CASCADE, null=True, related_name='supervised_profiles')
+    supervisor_contact = models.CharField(max_length=13, null=True)
+
+
+
     
     # Url field
     drivers_license_doc = models.URLField(null=True)

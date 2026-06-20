@@ -50,6 +50,9 @@ class Trip(models.Model):
     # Other Fields
     tanker = models.CharField(max_length=20, default = 0)
 
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
         return f"{self.trip_id} - {self.destination}"
     

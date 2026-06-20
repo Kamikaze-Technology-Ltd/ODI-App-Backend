@@ -33,4 +33,6 @@ urlpatterns = [
     path('api/dispatch/', include('dispatch.urls'), name='Dispatch Endpoints'),
     path('api/queries/', include('queries.urls'), name='Queries Endpoints'),
     path('api/reports/', include('report.urls'), name='Reports Endpoints'),
+    path('api/settings/', include('user_settings.urls'), name='Settings Endpoints'),
+    path('api/inspections/', include('inspection.urls'), name='Inspection Endpoints'),
 ]

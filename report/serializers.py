@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.core.files.uploadedfile import UploadedFile
 from athens.utils import upload_image
 from dispatch.models import Trip
-from .models import Reports
+from .models import Reports, Feedback
 
 
 def validate_is_file(value):
@@ -62,3 +62,14 @@ class ReportsSerializer(serializers.ModelSerializer):
             instance.photo = validated_data.pop('photo')
             instance.save()
         return super().update(instance, validated_data)
+
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feedback
+        fields = ['id', 'user', 'message', 'created_at']
+        read_only_fields = ('id', 'user', 'created_at')
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)

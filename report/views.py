@@ -3,8 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.exceptions import ValidationError
 
-from .models import Reports
-from .serializers import ReportsSerializer
+from .models import Reports, Feedback
+from .serializers import ReportsSerializer, FeedbackSerializer
 
 
 class ReportsListView(generics.ListAPIView):
@@ -46,4 +46,18 @@ class ReportsDeleteView(generics.DestroyAPIView):
     """DELETE /reports/delete/<id>/   — delete a report"""
     queryset = Reports.objects.all()
     serializer_class = ReportsSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class FeedbackCreateView(generics.CreateAPIView):
+    """POST /feedback/create/   — submit feedback"""
+    queryset = Feedback.objects.all()
+    serializer_class = FeedbackSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class FeedbackDeleteView(generics.DestroyAPIView):
+    """DELETE /feedback/delete/<id>/   — delete a feedback entry"""
+    queryset = Feedback.objects.all()
+    serializer_class = FeedbackSerializer
     permission_classes = [IsAuthenticated]

@@ -65,6 +65,8 @@ INSTALLED_APPS = [
     "dispatch",
     "queries",
     "report",
+    "user_settings",
+    "inspection",
 ]
 
 ASGI_APPLICATION = 'ODI.asgi.application'
