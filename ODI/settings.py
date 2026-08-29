@@ -31,11 +31,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['odi-app-backend.onrender.com', 'localhost', '127.0.0.1', 198.177.124.59:8001]
+ALLOWED_HOSTS = ['odi-app-backend.onrender.com', 'localhost', '127.0.0.1', 198.177.124.59]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://odi-app-backend.onrender.com',
-    'http://198.177.124.59:8001'
+    'http://198.177.124.59'
 ]
 
 
