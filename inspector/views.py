@@ -17,6 +17,7 @@ import logging
 
 from django.conf import settings as django_settings
 from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
@@ -147,7 +148,15 @@ class InspectorSignupView(views.APIView):
     def post(self, request):
         serializer = InspectorSignupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        inspector_profile = serializer.save()
+        try:
+            inspector_profile = serializer.save()
+        except IntegrityError as exc:
+            # Never let a database constraint reach the client as a 500 debug page.
+            logger.exception("[inspector] signup failed")
+            return Response(
+                {"msg": "Could not create the account.", "detail": str(exc)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         user = inspector_profile.user
 
         _send_otp(user)

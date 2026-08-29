@@ -6,6 +6,7 @@ never has to stitch three endpoints together to render one card.
 
 from django.contrib.auth import authenticate
 from django.core.files.uploadedfile import UploadedFile
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -94,8 +95,17 @@ class InspectorSignupSerializer(serializers.Serializer):
     accepted_terms = serializers.BooleanField(default=True)
 
     def validate_phone_number(self, value):
+        value = "".join(value.split())  # designs show "+234 000 0000 000"
+        if not value:
+            raise serializers.ValidationError("Phone number is required.")
         if User.objects.filter(phone_number=value).exists():
             raise serializers.ValidationError("An account already exists with this phone number.")
+        return value
+
+    def validate_email(self, value):
+        value = value.strip().lower()
+        if Profile.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("An account already exists with this work email.")
         return value
 
     def validate_accepted_terms(self, value):
@@ -103,10 +113,17 @@ class InspectorSignupSerializer(serializers.Serializer):
             raise serializers.ValidationError("You must accept the terms and conditions.")
         return value
 
+    @transaction.atomic
     def create(self, validated_data):
+        # driver_id doubles as the badge ID and is unique + max_length=10,
+        # so "INS-1234" fits. Retry on the (unlikely) collision.
         badge_id = generate_badge_id()
-        while User.objects.filter(driver_id=badge_id).exists():
+        for _ in range(10):
+            if not User.objects.filter(driver_id=badge_id).exists():
+                break
             badge_id = generate_badge_id()
+        else:
+            raise serializers.ValidationError("Could not allocate a badge ID. Please try again.")
 
         user = User.objects.create_user(
             phone_number=validated_data["phone_number"],
@@ -115,13 +132,19 @@ class InspectorSignupSerializer(serializers.Serializer):
             role="inspector",
         )
 
+        # Every driver-only column on Profile is passed explicitly so this never
+        # depends on a model default: license_expiry in particular used to be
+        # NOT NULL and blew up inspector signup with an IntegrityError.
         Profile.objects.create(
             user=user,
-            full_name=validated_data["full_name"],
+            full_name=validated_data["full_name"].strip(),
             gender="",
-            date_of_birth=timezone.localdate(),
+            date_of_birth=None,
             email=validated_data["email"],
             phone_number=user.phone_number,
+            medical_history="",
+            drivers_license="",
+            license_expiry=None,
             emergency_contact_phone_no="",
             depot_zone=validated_data["zone"],
         )
@@ -393,7 +416,7 @@ class AlertActionSerializer(serializers.Serializer):
     notes = serializers.CharField(required=False, allow_blank=True, max_length=1000)
 
 
-# ─────────────────────────── Queries + notifications ───────────────────────────
+# ─────────���───────────────── Queries + notifications ───────────────────────────
 
 
 class InspectorQuerySerializer(serializers.ModelSerializer):

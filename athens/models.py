@@ -56,15 +56,17 @@ class Profile(models.Model):
     
     id = models.CharField(max_length=255, primary_key=True, default=generate_id, null=False)
     full_name = models.CharField(max_length=255, null=False)
-    gender = models.CharField(max_length=10, choices=CURRENCY_CHOICES, null=False)
-    date_of_birth = models.DateField(null=False)
+    # Driver-specific fields are optional: an inspector has no licence, no
+    # medical history on file and no emergency contact at signup time.
+    gender = models.CharField(max_length=10, choices=CURRENCY_CHOICES, blank=True, default="")
+    date_of_birth = models.DateField(null=True, blank=True)
     email = models.EmailField(null=False)
-    medical_history = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=13, null=False)
-    drivers_license = models.CharField(max_length=255)
-    license_expiry = models.DateField()
-    emergency_contact_phone_no = models.CharField(max_length=13, null=False)
-    profile_picture = models.URLField(null=True)
+    medical_history = models.CharField(max_length=255, blank=True, default="")
+    phone_number = models.CharField(max_length=20, null=False)
+    drivers_license = models.CharField(max_length=255, blank=True, default="")
+    license_expiry = models.DateField(null=True, blank=True)
+    emergency_contact_phone_no = models.CharField(max_length=20, blank=True, default="")
+    profile_picture = models.URLField(null=True, blank=True)
 
     #Work Details
     start_date = models.DateField(auto_now=True)
