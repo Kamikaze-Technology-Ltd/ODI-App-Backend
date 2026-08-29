@@ -36,4 +36,5 @@ urlpatterns = [
     path('api/settings/', include('user_settings.urls'), name='Settings Endpoints'),
     path('api/inspections/', include('inspection.urls'), name='Inspection Endpoints'),
     path('api/inspector/', include('inspector.urls'), name='Inspector Endpoints'),
+    path('api/mobile/', include('mobile.urls'), name='Mobile App Endpoints'),
 ]

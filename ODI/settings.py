@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "user_settings",
     "inspection",
     "inspector",
+    "mobile",
 ]
 
 ASGI_APPLICATION = 'ODI.asgi.application'
