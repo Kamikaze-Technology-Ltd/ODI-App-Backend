@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "report",
     "user_settings",
     "inspection",
+    "inspector",
 ]
 
 ASGI_APPLICATION = 'ODI.asgi.application'
