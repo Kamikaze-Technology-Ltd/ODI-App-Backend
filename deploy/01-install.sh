@@ -28,7 +28,7 @@ DOMAIN="odii.intelsof.com"
 
 # Sets the Let's Encrypt account contact. Currently 'none' on this box, which
 # is why the wildcard silently drifted to 17 days. Applies to ALL certs here.
-EMAIL=""                      # <-- PUT A REAL MONITORED ADDRESS HERE
+EMAIL="kamikazetechnology8@gmail.com"                      # <-- PUT A REAL MONITORED ADDRESS HERE
 
 APP_DIR="/root/odii_backend/ODI-App-Backend"
 VENV="$APP_DIR/venv"
