@@ -31,12 +31,34 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['odi-app-backend.onrender.com', 'localhost', '127.0.0.1', '198.177.124.59']
+ALLOWED_HOSTS = [
+    'odii.intelsof.com',
+    'odi-app-backend.onrender.com',
+    'localhost',
+    '127.0.0.1',
+    '198.177.124.59',
+]
 
 CSRF_TRUSTED_ORIGINS = [
+    'https://odii.intelsof.com',
     'https://odi-app-backend.onrender.com',
-    'http://198.177.124.59'
 ]
+
+# --- Running behind the nginx TLS terminator -------------------------------
+# nginx speaks https to the phone and plain http to gunicorn on 127.0.0.1.
+# Without this header Django believes every request is insecure, which breaks
+# SECURE_SSL_REDIRECT (infinite redirect loop) and request.build_absolute_uri()
+# (Cloudinary callbacks / OTP links come out as http://).
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
+# Only turn these on AFTER the certificate is issued and working, otherwise
+# you can lock yourself out of the API.
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True'
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
 
 # Application definition
@@ -74,17 +96,20 @@ INSTALLED_APPS = [
 
 ASGI_APPLICATION = 'ODI.asgi.application'
 
-# Use InMemoryChannelLayer for development.
-# For production, replace with Redis: pip install channels_redis
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {'hosts': [('127.0.0.1', 6379)]},
-#     }
-# }
+# Redis IS already running on this VPS (127.0.0.1:6379), so use it.
+#
+# InMemoryChannelLayer is per-process. odii_backend.service runs gunicorn with
+# --workers 3, which means three isolated channel layers: a chat message only
+# ever reaches users who happen to be on the same worker. With daphne added as
+# a fourth process it gets worse. Redis gives all processes one shared layer.
+#
+# Requires: pip install channels_redis
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [(os.getenv('REDIS_HOST', '127.0.0.1'), int(os.getenv('REDIS_PORT', 6379)))],
+        },
     }
 }
 

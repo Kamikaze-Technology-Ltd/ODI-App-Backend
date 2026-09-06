@@ -1,0 +1,33 @@
+# /etc/systemd/system/odii_daphne.service
+#
+# Your odii_backend.service runs ODI.wsgi:application under gunicorn's default
+# sync worker. That is WSGI-only and cannot complete a websocket handshake, so
+# chat/consumers.py (ws/chat/<room_id>/) is unreachable today.
+#
+# This unit runs daphne on ODI.asgi:application for /ws/ only. gunicorn keeps
+# serving the REST API unchanged. Paths mirror odii_backend.service exactly.
+
+[Unit]
+Description=ODII Daphne (ASGI websockets)
+After=network.target
+
+[Service]
+Type=simple
+
+User=root
+Group=root
+
+WorkingDirectory=/root/odii_backend/ODI-App-Backend
+Environment="PATH=/root/odii_backend/ODI-App-Backend/venv/bin"
+Environment="DJANGO_SETTINGS_MODULE=ODI.settings"
+
+ExecStart=/root/odii_backend/ODI-App-Backend/venv/bin/daphne \
+    -b 127.0.0.1 \
+    -p 8002 \
+    ODI.asgi:application
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
